@@ -5,3 +5,7 @@ Blitz++
 freePOOMA
 
 gridmath
+
+SCore
+
+ParSol
