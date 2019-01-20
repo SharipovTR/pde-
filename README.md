@@ -6,7 +6,11 @@
     <li> Blitz++</li>
    </ul>
 
-define grad grad_right
+# C Example
+
+```c
+
+#define grad grad_right
 #define div div_left
 
     /*bool not_finish = 1;
@@ -341,3 +345,5 @@ UTEST(TVectorMeshFunc *, 0) {
     //yy(1,1) = -fabs(uu(1,1), false);//todo
 	return 0;
 }
+
+```
