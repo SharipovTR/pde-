@@ -10,51 +10,16 @@
 
 ```c
 
+#include "pdepp.h"
+
+typedef ScalarMeshProxy<double> E;
+
+//скалярные сеточные операторы
+typedef ScalarMeshFunc<double> TScalarMeshFunc;
+typedef VectorMeshFunc<double> TVectorMeshFunc;
+
 #define grad grad_right
 #define div div_left
-
-    /*bool not_finish = 1;
-    iter_ = 0;
-    while (not_finish) {
-    	not_finish = iter_++ < 1000;
-    	//rhs_p_(I_) = p_(I_);// +p_(I_) + p_(I_) + p_(I_) + p_(I_) + p_(I_) + p_(I_);
-
-    	for (int k = 1; k <= 6; k++) {
-    #ifndef USE_POOMA
-    		//	FOREACH_INTERVAL(I_, i, j) {
-    		//	rhs_p_(i, j).PlusEq();
-    		//}
-    #endif
-    		rhs_p_(I_) = div(u_(I_));
-    		//ASSERT(res_(1, 1).comp(1).right() != 0);
-    	}
-    }
-    return;*/
-
-struct Mesh {
-    int nx;
-    double hx;
-
-    int ny;
-    double hy;
-};
-
-template<class Array>
-void CalcLaplace(const Mesh &mesh, const Array &u, Array &f)
-{
-    double ihx2 = 1. / (mesh.hx * mesh.hx);
-    double ihy2 = 1. / (mesh.hy * mesh.hy);
-
-    double L1;
-    double L2;
-    for (int i, j = 1; i <= mesh.nx; i++) {
-        for (j = 1; j <= mesh.ny; j++) {
-            L1 = (u(i - 1, j) + 2 * u(i, j) + u(i + 1, j)) * ihx2;
-            L2 = (u(i, j - 1) + 2 * u(i, j) + u(i, j + 1)) * ihy2;
-            f(i, j) = L1 + L2;
-        }
-    }
-}
 
 UTEST(TScalarMeshFunc *, 0) {
     enum {a = 0};
@@ -89,7 +54,7 @@ UTEST(TScalarMeshFunc *, 0) {
 
     Interval2d I(1, u.nx(), 1, u.ny());
     u(I) = 1;
-	return 0;
+    return 0;
 }
 
 UTEST(TScalarMeshFunc *, 1) {
@@ -115,21 +80,8 @@ UTEST(TScalarMeshFunc *, 1) {
     ScalarCell<double> &c = f(1, 1);
     f(I) = -laplacian(u(I)) + u(I);
 
-    //u(I) = laplacian(u(I) + u(I)) - u(I);
-
     ASSERT_EQ(f(1, 1), -laplacian(u(1, 1)) + u(1, 1));
-
-    /*ScalarCell<double> t(c);
-    t = u(I).Eval(1, 1);
-    t.PlusEq();
-    t = 1;
-    t.Eval();
-    c = t;
-    ASSERT_EQ(c, u(1, 1) + 1);*/
-
-    //c += 2 * u(1, 1);
-    //ASSERT_EQ(c, u(1, 1) + 1);
-	return 0;
+    return 0;
 }
 
 UTEST(TScalarMeshFunc *, 2) {
@@ -146,12 +98,10 @@ UTEST(TScalarMeshFunc *, 2) {
     y(I) = u(I);
     y(I) += u(I);
     y.all() += u.all();
-
-    //ScalarCell<double> bb = u(1, 1) * 1.;//todo
-
+    
     f.all() = 1.3;
     y.all() = 3;
-    y.all() -= 2 * f.all();//todo
+    y.all() -= 2 * f.all();
 
     double t = y(1, 1);
 
@@ -175,61 +125,8 @@ UTEST(TScalarMeshFunc *, 2) {
     dblArray1d v;
 
     u(I).ToVector(&v, 1);
-	u(I).FromVector(v, 1);
-	return 0;
-}
-
-UTEST(TScalarMeshFunc *, 3) {
-    enum {a = 0};
-    enum {b = 1};
-    enum {n = 2};
-
-    TScalarMeshFunc u(a, b, n, n);
-
-    u(1, 1).val() = 3;
-    ScalarCell<double> x1 = u(1, 1);
-    ScalarCell<double> x2 = u(1, 1);
-    ScalarCell<double> x3 = u(1, 1);
-    ScalarCell<double> x4 = u(1, 1);
-    ScalarCell<double> x5 = u(1, 1);
-    ScalarCell<double> r = u(1, 1);
-
-    x1 = 1;
-    x2 = 2;
-    x3 = 3;
-    x4 = 4;
-    x5 = 5;
-
-#if 0
-    double rv = (x1 + x2) * (x3 + x4) * x5 / (x1 + x2 + x3);
-
-	r = 0;
-    r.Eval();
-    r = x1;
-    r += x2;
-    r.MultEq();
-    r = x3;
-    r += x4;
-    r.Eval();
-    r *= x5;
-    r.DivideEq();
-	r = x1;//todo: fix error when r = x1 + x2 + x3
-	r += x2;
-	r += x3;
-    r.Eval();
-
-    ASSERT_DBL_EQ(r, rv);
-#else
-    double rv = (x1 + x2) * x5;
-
-    r.Eval();
-    r = x1;
-    r += x2;
-//	r.MultEq();
-    r = x5;
-    r.Eval();
-#endif
-	return 0;
+    u(I).FromVector(v, 1);
+    return 0;
 }
 
 UTEST(TScalarMeshFunc *, 4) {
@@ -243,8 +140,9 @@ UTEST(TScalarMeshFunc *, 4) {
     StopWatch sw(true);
     for (int i = 0; i < 100; i++)
         y(I) = u(I) + u(I) + u(I) + u(I) + u(I) + u(I);
+    
     ECHO_N(sw.Stop());
-	return 0;
+    return 0;
 }
 
 UTEST(TVectorMeshFunc *, 0) {
@@ -340,10 +238,8 @@ UTEST(TVectorMeshFunc *, 0) {
     u(I) = div(uu(I));
     yy(I) = grad(u(I));
     yy(I) = grad(div(uu(I)));
-    //y = div(grad(div(grad(u))));
 
-    //yy(1,1) = -fabs(uu(1,1), false);//todo
-	return 0;
+    return 0;
 }
 
 ```
