@@ -4,4 +4,6 @@
 <h3> Аналоги</h3>
   <ul>
     <li> FreePOOMA</li>
+    <li> Blitz++</li>
    </ul>
+
